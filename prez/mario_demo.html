@@ -78,6 +78,23 @@
 			}
 		</style>
 		<script src="js/nsqdemo.js"></script>
+	</head>
+	<body>
+		<h1>Pošalji Maria kroz NSQ</h1>
+		<div id="marioBG" onclick="SendMario()" style="margin:0 auto;"></div>
+		<audio id="marioWarp" preload="auto">
+			<source src="snd/nsmbwiiWarpPipe.wav">
+		</audio>
+		<audio id="marioFall" preload="auto">
+			<source src="snd/nsmb_flagpole.wav">
+		</audio>
+		<audio id="marioDie" preload="auto">
+			<source src="snd/nsmbwiiDeath.wav">
+		</audio>
+		<audio id="marioMusic" preload="auto">
+			<source src="snd/02-title-screen-nsmbwii-.mp3">
+		</audio>
+		<p>Hint: klikni na level!</p>
 		<script type="text/javascript">
 			// Mario stuff
 			var mcounter = 0;
@@ -108,31 +125,14 @@
 				}, 2000);
 				PlayWarp();
 			}
+
 			// NSQ Demo
 			var nsqdemo = new NSQDemo(ReceiveMario.bind(this));
 
-			function StartMusic() {
-				var music = document.getElementById('marioMusic');
-				music.volume = 0.5;
-				music.play();
-			}
+			// Music
+			var music = document.getElementById('marioMusic');
+			music.volume = 0.5;
+			music.play();
 		</script>
-	</head>
-	<body onload="StartMusic()">
-		<h1>Pošalji Maria kroz NSQ</h1>
-		<div id="marioBG" onclick="SendMario()" style="margin:0 auto;"></div>
-		<audio id="marioWarp" preload="auto">
-			<source src="snd/nsmbwiiWarpPipe.wav">
-		</audio>
-		<audio id="marioFall" preload="auto">
-			<source src="snd/nsmb_flagpole.wav">
-		</audio>
-		<audio id="marioDie" preload="auto">
-			<source src="snd/nsmbwiiDeath.wav">
-		</audio>
-		<audio id="marioMusic" preload="auto">
-			<source src="snd/02-title-screen-nsmbwii-.mp3">
-		</audio>
-		<p>Hint: klikni na level!</p>
 	</body>
 </html>
