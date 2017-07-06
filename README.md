@@ -32,7 +32,8 @@ Za one koje zanima samo "Super Mario" mogu ga pogledati na:
 consul.json je statička consul konfiguracija kako bi svckit mogao korisiti nsq
 
 main.go je primjer za nsq komunikaciju a ujedno i server
-./prez/js/nsqdemo.js je JS za komunikaciju WS->NSQ->WS kao primjer.
+
+./prez/js/nsqdemo.js je JS za komunikaciju WS->NSQ->WS kao dio primjera.
 
 draw.io sadrži slike napravljene sa:  
 [https://www.draw.io/](https://www.draw.io/)
