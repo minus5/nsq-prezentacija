@@ -1,0 +1,448 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<title>NSQ Prezentacija</title>
+		<link rel="stylesheet" href="css/reveal.css">
+		<!-- <link rel="stylesheet" href="css/theme/white.css" id="theme"> -->
+		<link rel="stylesheet" href="css/theme/league.css" id="theme">
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<style>
+			#marioBG{
+				width: 767px;
+				height: 519px;
+				background-image: url('img/MarioDemoScr.png');
+				background-repeat: no-repeat no-repeat;
+				overflow: hidden;
+				position: relative;
+			}
+			.mario{
+				width: 42px;
+				height: 71px;
+				background-image: url('img/SuperMario3_2.png');
+				background-repeat: no-repeat no-repeat;
+				background-position: bottom left;
+			}
+			@keyframes marioWalk {
+				from {
+					background-position-x: 0px;
+				}
+				to{
+					background-position-x: -225px;
+				}
+			}
+			@keyframes enterMario {
+				0%{
+					top: -71px;
+					left: 400px;
+					width: 42px;
+				}
+				25%{
+					top: 125px;
+					left: 400px;
+					width: 42px;
+				}
+				75%{
+					left: 490px;
+					width: 42px;
+				}
+				100%{
+					left: 526px;
+					width: 0px;
+				}
+			}
+			.enter {
+				position: absolute;
+				left:490px;
+				top:125px;
+				animation: enterMario 3s forwards 1, marioWalk 0.8s steps(5) infinite;
+			}
+			@keyframes marioExit {
+				0% {
+					height: 0px;
+					top: 407px
+				}
+				25% {
+					height: 71px;
+					top: 407px
+				}
+				100% {
+					top: 519px;
+				}
+			}
+			.exit {
+				position: absolute;
+				left:605px;
+				top:407px;
+				animation-name: marioExit;
+				animation-duration: 3s;
+				animation-iteration-count: 1;
+				animation-fill-mode: forwards;
+			}
+		</style>
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-transition="zoom">
+					<h1>NSQ</h1>
+					<blockquote>@igor: A jel znaš ti kako radi NSQ?</blockquote>
+					<p>by Quille and friends</p>
+				</section>
+				<section data-transition="convex">
+					<h2>Što je NSQ?</h2>
+					<p><span class="fragment fade-up"><b>N</b>ew </span><span class="fragment fade-up"><b>S</b>imple </span><span class="fragment fade-up"><b>Q</b>ueue</span></p>
+					<p class="fragment">A realtime distributed messaging platform</p>
+					<p class="fragment"><a href="http://nsq.io/" target="_blank">http://nsq.io/</a></p>
+					<p class="fragment">Dokumentacija <a href="http://nsq.io/overview/design.html" target="_blank">http://nsq.io/overview/design.html</a></p>
+					<p class="fragment">Source <a href="https://github.com/nsqio/nsq" target="_blank">https://github.com/nsqio/nsq</a></p>
+				</section>
+				<section data-transition="convex">
+					<section data-transition="convex">
+						<h2>Terminologija</h2>
+						<ul>
+							<li class="fragment"><b>Producer</b> - klijent koji <b>šalje poruke</b></li>
+							<li class="fragment"><b>Subscriber</b> - klijent koji <b>prima poruke</b></li>
+							<li class="fragment"><b>Message</b> - poruka koju razmjenjuju Producer i Subscriber</li>
+							<li class="fragment"><b>Topic</b> - queue poruka koje je poslao klijent</li>
+							<li class="fragment"><b>Channel</b> - queue poruka na Topic-u koje konzumira Subscriber</li>
+						</ul>
+					</section>
+					<section data-transition="convex" data-background-image="img/messages-icon.png" data-background-position="left 0 bottom 0" data-background-size="auto auto">
+						<h3>Poruka (message)</h3>
+						<ul>
+							<li class="fragment"><b>Poruka</b> je niz byte-ova</li>
+							<li class="fragment">NSQ <b>garantira</b> isporuku poruke barem jednom, <b>ne garantira</b> redoslijed</li>
+							<li class="fragment">NSQ <b>čuva</b> poruku dok klijent ne potvdi primitak <b>FIN</b></li>
+							<li class="fragment">U slučaju <b>timeouta</b> isporuke ponavlja poruku <b>REQ (re-queue)</b></li>
+							<li class="fragment">Poruke stoje u <b>memoriji</b> do limita nakon čega se snimaju na disk</li>
+						</ul>
+					</section>
+					<section data-transition="convex">
+						<h3>Topic</h3>
+						<ul>
+							<li class="fragment">Topic se kreira prilikom slanja prve poruke ili pokušaja čitanja</li>
+							<li class="fragment">Svaki Topic ima određeno ime, koje postavlja klijent</li>
+							<li class="fragment">Sve poruke koje kijent pošalje prvo ulaze u Topic</li>
+							<li class="fragment">Poruke stoje u Topic-u sve dok se ne stvori Channel</li>
+							<li class="fragment">Producer uvijek piše na Topic</li>
+						</ul>
+					</section>
+					<section data-transition="convex">
+						<h3>Channel</h3>
+						<ul>
+							<li class="fragment">Channel se kreira kad klijent želi čitati poruke iz Topica</li>
+							<li class="fragment">Svaki Channel ima određeno ime, koje postavlja klijent</li>
+							<li class="fragment">Poruke se iz Topica prebacuju u Channel(e) koje klijent čita</li>
+							<li class="fragment">Poruke stoje u Channel-u ako ih klijent ne čita</li>
+							<li class="fragment">Subscriber uvijek čita iz Channel-a</li>
+						</ul>
+					</section>
+					<section data-transition="convex">
+						<h3>Ephemeral</h3>
+						<ul>
+							<li class="fragment">Topic/Channel može biti ephemeral</li>
+							<li class="fragment">Iz ephemeral-a poruke se ne snimanju na disk prilkom overflow-a</li>
+							<li class="fragment">Ephemeral Topic/Channel se brišu kad više nema spojenih klijenata</li>
+							<li class="fragment">Ephemeral Channel je zgodan za snifanje poruka</li>
+						</ul>
+					</section>
+				</section>
+				<section data-transition="convex">
+					<section>
+						<h2>NSQ Komponente</h2>
+						<ul style="list-style-image:url('img/SmilingRedDevil-64x64.png')">
+							<li class="fragment"><b>nsqd</b> - daemon koji prima, queue-ove, i isporučuje poruke klijentima.</li>
+							<li class="fragment"><b>nsqlookupd</b> - daemon koji čuva informacije o topologiji clustera.</li>
+							<li class="fragment"><b>nsqadmin</b> - Web UI za pregled cluster-a, statistika i administraciju.</li>
+						</ul>
+					</section>
+					<section data-background-image="img/SmilingRedDevil-256x256.png" data-background-position="left 0 bottom 0" data-background-size="auto auto">
+						<h3>NSQD</h3>
+						<p class="fragment">Dokumentacija <a href="http://nsq.io/components/nsqd.html">http://nsq.io/components/nsqd.html</a></p>
+						<p class="fragment">prima poruke od <b>producera</b>, isporučuje <b>subscriber-u</b></p>
+						<p class="fragment">kreira <b>Topic-e</b> i <b>Channele</b> na zahtjev klijenta</p>
+						<p class="fragment">može raditi <b>standalone</b> ili u <b>cluster-u</b> s nsqlookup-om</p>
+						<p class="fragment">kad je u <b>cluster-u oglašava</b> topic-e i channel-e nsqlookup-u</p>
+						<p class="fragment">preporučeno je pokrenuti jednu instancu po serveru s producerima</p>
+					</section>
+					<section data-background-image="img/SmilingRedDevil-256x256.png" data-background-position="left 0 bottom 0" data-background-size="auto auto">
+						<h3>NSQLOOKUPD</h3>
+						<p class="fragment">Dokumentacija <a href="http://nsq.io/components/nsqlookupd.html">http://nsq.io/components/nsqlookupd.html</a></p>
+						<p class="fragment">nsqd oglašava <b>topic-e</b> i <b>channel-e</b> na nsqlookupd-u</p>
+						<p class="fragment">klijenti pronalaze nsqd-ove s <b>topic-ima</b> i <b>channel-ima</b> pomoću nsqlookupd-a</p>
+						<p class="fragment">nsqd oglašava <b>topic-e</b> i <b>channel-e</b> na nsqlookupd-u</p>
+						<p class="fragment">preporučeno je pokrenuti više instanci u datacentru</p>
+					</section>
+					<section data-background-image="img/SmilingRedDevil-256x256.png" data-background-position="left 0 bottom 0" data-background-size="auto auto">
+						<h3>NSQADMIN</h3>
+						<p class="fragment">Dokumentacija <a href="http://nsq.io/components/nsqadmin.html">http://nsq.io/components/nsqadmin.html</a></p>
+						<p class="fragment">prikuplja informacije sa nsqlookupd-ova</p>
+						<p class="fragment">kroz WEB UI omogućuje nadzor i adminstraciju channel-a i topic-a</p>
+						<p class="fragment">dovoljna je jedna instanca u clusteru</p>
+					</section>
+					<section>
+						<h3>Kako putuju poruke kroz NSQ</h3>
+						<img class="fragment" src="img/nsq_msg_example.gif">
+					</section>
+					<section>
+						<h3>Izbjegavanje SPOF</h3>
+						<p class="fragment">Kako izbjeći Single Point Of Failure?</p>
+						<ul>
+							<li class="fragment">Klijenti se spajaju na sve NSQD-ove koji imaju određeni Topic/Channel</li>
+							<li class="fragment">NSQLOOKUPD-ovi ne razgovaraju međusobno, ali će u određenom trenutku imati sve podatke</li>
+							<li class="fragment">Zanimljivo je pitanje kako imati više od jednog NSQD-a sa istim Topic/Channel-ima</li>
+						</ul>
+					</section>
+				</section>
+				<section data-transition="convex">
+					<h2>NSQ Utility</h2>
+					<ul>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#nsq_stat"><b>nsq_stat</b></a> prikazuje agregirane statistike svih Producera za neki Topic/Channlel</li>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#nsq_tail"><b>nsq_tail</b></a> čita Topic/Channel i prikazuje na stdout-u</li>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#nsq_to_file"><b>nsq_to_file</b></a> čita Topic/Channel i snima u file</li>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#nsq_to_http"><b>nsq_to_http</b></a> čita Topic/Channel radi POST/GET na neki endpoint</li>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#nsq_to_nsq"><b>nsq_to_nsq</b></a> čita Topic/Channel i radi republish u NSQ</li>
+						<li class="fragment"><a href="http://nsq.io/components/utilities.html#to_nsq"><b>to_nsq</b></a> čita stdin i publish-a na Topic</li>
+					</ul>
+				</section>
+				<section data-transition="convex">
+					<h2>NSQ Client-i</h2>
+					<p class="fragment">Postoji <a href="http://nsq.io/clients/client_libraries.html">implementacija NSQ klijenta</a> za različite jezike.</p>
+					<p class="fragment">Mi koristimo klijente:</p>
+					<ul class="fragment">
+						<li><a href="https://github.com/nsqio/go-nsq">go-nsq</a> Go klijent</li>
+						<li><a href="https://github.com/dudleycarr/nsqjs">nsqjs</a> JS klijent</li>
+					</ul>
+				</section>
+				<section data-transition="convex">
+					<section data-transition="convex">
+						<h2>Kako se NSQ koristi?</h2>
+						<p class="fragment">Treba nam <b>Poruka</b> koju želimo poslati</p>
+						<p class="fragment">Dobro je imati <b>Producera</b> koji šalje poruke</p>
+						<p class="fragment"><b>Producer</b> će kreirati <b>Topic</b> kad pošalje prvu <b>Poruku</b></p>
+						<p class="fragment"><b>Subsciber</b> će otvoriti <b>Channel</b> kad želi primiti <b>Poruku</b></p>
+						<p class="fragment">Ali kako ?????</p>
+					</section>
+					<section data-background-image="img/Super_mario_by_mintenndo-d62lh70.png" data-background-position="left 0 bottom 0" data-background-size="contain">
+						<h3>Super Mario pomaže!</h3>
+						<p class="fragment">On NSQ koristi već godinama!</p>
+						<iframe class="fragment" width="480" height="360" src="https://www.youtube.com/embed/iwBoRlHfRQk?start=237&end=246" frameborder="0" allowfullscreen></iframe>
+						<audio id="marioYeah" preload="auto">
+							<source src="snd/mario_something.wav">
+						</audio>
+					</section>
+					<section data-transition="convex">
+						<h3>Pošalji Maria kroz NSQ</h3>
+						<div id="marioBG" onclick="SendMario()" style="margin:0 auto;"></div>
+						<audio id="marioWarp" preload="auto">
+							<source src="snd/nsmbwiiWarpPipe.wav">
+						</audio>
+						<audio id="marioFall" preload="auto">
+							<source src="snd/nsmb_flagpole.wav">
+						</audio>
+						<audio id="marioDie" preload="auto">
+							<source src="snd/nsmbwiiDeath.wav">
+						</audio>
+						<audio id="marioMusic" preload="auto">
+							<source src="snd/02-title-screen-nsmbwii-.mp3">
+						</audio>
+						<small>Hint: klikni na level!</small>
+					</section>
+					<section data-background-image="img/gopher_doc.png" data-background-position="left 0 bottom 0" data-background-size="auto auto" data-transition="convex">
+						<h3>Kako poslati poruku?</h3>
+						<pre class="fragment"><code class="go">
+// Producer
+nsqtopic := "super.mario"
+producer := nsq.MustNewProducer(nsqtopic)
+defer producer.Close()
+....
+// Posalji
+msg := "Poruka koju saljem!"
+producer.Publish([]byte(msg))
+						</code></pre>
+					</section>
+					<section data-background-image="img/gopher_doc.png" data-background-position="left 0 bottom 0" data-background-size="auto auto" data-transition="convex">
+						<h3>Kako primiti poruku?</h3>
+						<pre class="fragment"><code class="go">
+// Consumer
+nsqtopic := "super.mario"
+consumer = nsq.MustNewConsumer(nsqtopic, onNSQMsg)
+defer consumer.Close()
+....
+func onNSQMsg(msg *nsq.Message) error {
+	fmt.Println(string(msg.Body))
+	return nil
+}
+						</code></pre>
+					</section>
+				</section>
+				<section data-transition="convex">
+					<section>
+						<h2>Primjeri distribucije poruka</h2>
+						<p class="fragment">Distribucija poruka se definira pomoću <b>naziva</b> Topic-a i Channel-a</p>
+						<ul>
+							<li class="fragment">Ista poruka na <b>više</b> klijenata</li>
+							<li class="fragment"><b>Paralelna</b> obrada poruka</li>
+							<li class="fragment"><b>Više producera</b> šalje poruke na <b>jednog ili više</b> klijenata</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Ista poruka na više klijenata (distribucija)</h3>
+						<p class="fragment"><b>Producer</b> kreira <b>Topic</b> npr <b>porukeTopic</b> i šalje poruke</p>
+						<p class="fragment"><b>Subscriber 1</b> se spaja na <b>Topic porukeTopic</b> i kreira <b>Channel</b> npr <b>subscriber-1</b></p>
+						<p class="fragment"><b>Subscriber 2</b> se spaja na <b>Topic porukeTopic</b> i kreira <b>Channel</b> npr <b>subscriber-2</b></p>
+						<p class="fragment">Oba Subscribera primaju istu poruku poslanu na <b>porukeTopic</b></p>
+					</section>
+					<section>
+						<h3>Distribucija kod nas</h3>
+						<p class="fragment">backend_api šalje listice na Listici.svc i nsq_to_mongo</p>
+						<img class="fragment" width="600" src="img/NSQ-backend_api-listicisvc.png">
+					</section>
+					<section>
+						<h3>Paralelna obrada poruka (balansiranje)</h3>
+						<p class="fragment"><b>Producer</b> kreira <b>Topic</b> npr <b>porukeTopic</b> i šalje poruke</p>
+						<p class="fragment"><b>Subscriber 1</b> se spaja na <b>Topic porukeTopic</b> i kreira/spaja na <b>Channel</b> npr <b>subscriber</b></p>
+						<p class="fragment"><b>Subscriber 2</b> se spaja na <b>Topic porukeTopic</b> i kreira/spaja na <b>Channel</b> npr <b>subscriber</b></p>
+						<p class="fragment">Subscriberi ovisno o brzini obrade naizmjence dobivanju poruke poslane na <b>porukeTopic</b></p>
+					</section>
+					<section>
+						<h3>Paralelna obrada kod nas</h3>
+						<p class="fragment">Upis listića s backend_api-a prema na DBI-u</p>
+						<img class="fragment" width="600" src="img/NSQ-backend_api-dbi.png">
+					</section>
+					<section>
+						<h3>Više producera šalje poruke na jednog ili više klijenata</h3>
+						<p class="fragment"><b>Producer 1</b> kreira <b>topic</b> npr <b>porukeTopic</b> i šalje poruke</p>
+						<p class="fragment"><b>Producer 2</b> spaja se na <b>topic</b> npr <b>porukeTopic</b> i šalje poruke</p>
+						<p class="fragment">Sve poruke završavaju <b>u istom topicu</b>, o <b>imenu channel-a subscribera</b> ovisi distribucija</p>
+						<p class="fragment">Različita imena channela omogućuju distribuciju na više klijenata, isto ime channela paralelna obrada.</p>
+					</section>
+					<section>
+						<h3>Više Producera, jedan ili više klijenta kod nas</h3>
+						<p class="fragment">Upis listića s web_app_api-a prema backend_api-u</p>
+						<img class="fragment" width="600" src="img/NSQ-web_app_api-backend_api.png">
+					</section>
+				</section>
+				<section data-transition="convex">
+					<section>
+						<h2>Nagradna igra</h2>
+						<p class="fragment">Pravila nagradne igre</p>
+						<ul>
+							<li class="fragment">Najbrži sudionik dobiva pravo na odgovor</li>
+							<li class="fragment">Prijave za odgovore počinju kad predavač kaže <blockquote>Vrijeme SAD!</blockquote></li>
+							<li class="fragment">Najtočniji odgovor dobiva nagradu</li>
+						</ul>
+					</section>
+					<section style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;" data-background-image="img/kras_tortica.jpg">
+						<h3 style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;">Pitanje za Kraš Torticu</h3>
+						<p class="fragment">Koja je razlika između <b>nsqd</b> i  <b>nsqlookupd</b>?</p>
+						<p class="fragment">Nemoj misliti na Torticu!</p>
+						<p class="fragment"><b>nsqd</b> prima poruke od <b>publishera</b> i šalje ih <b>subscriberima</b>, 
+						kreira <b>topic-e</b> i <b>channel-e</b> oglašava ih na <b>nsqlookupd-u</b> koji 
+						čuva podatke na kojem <b>nsqd-u</b> gde se nalaze <b>topic-i</b> i <b>channel-i</b> 
+						</p>
+					</section>
+					<section style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;" data-background-image="img/kras_tortica2.jpg">
+						<h3 style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;">Pitanje za Kraš Torticu ponovo</h3>
+						<p class="fragment">Što će se dogoditi s porukama <b>poslanim na Topic</b> ako <b>nema Subscribera</b>?</p>
+						<p class="fragment">Ponovo nemoj misliti na Torticu!</p>
+						<p class="fragment">Gomilati će se u <b>Topic-u</b> dok <b>Subscriber</b> ne stvori <b>Channel</b>, 
+						zatim će se prebaciti u <b>Channel</b> iz kojeg će ih <b>Subscriber</b> pročitati</p>
+						<p class="fragment">Koliko će tada ostati poruka u <b>topic-u</b> a koliko u <b>channel-u</b> ako ih <b>subscriber</b> više ne šalje?</p>
+						<p class="fragment"><b>Točno nula, nada ili baš ništa!</b></p>
+					</section>
+					<section style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;" data-background-image="img/rpi-b2.jpg">
+						<h3 style="color:white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;">Pitanje za Raspberry PI 1 B</h3>
+						<p class="fragment">Koliko ima vrata na ormaru u Minus5 konferencijskoj?</p>
+						<p class="fragment">Nemoj misliti na Raspberry PI!</p>
+						<p class="fragment"><b>Točno: 16 ili 0x10 ili %10000</b></p>
+					</section>
+				</section>
+				<section data-background-image="img/Super_mario_by_mintenndo-d62lh70.png" data-background-position="left 0 bottom 0" data-background-size="contain" data-transition="zoom">
+					<h1>NSQ The End</h1>
+					<blockquote>@igor: A jel <b>ti SAD</b> znaš kako radi NSQ?</blockquote>
+					<p>Hvala! @Quille over and out..</p>
+					<blockquote>@moni: Ako je Bicko za <b>5</b> ocjenite današnju prezntaciju</blockquote>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+		<script src="js/nsqdemo.js"></script>
+		<script>
+			// Mario stuff
+			var mcounter = 0;
+			function PlayWarp() {
+				document.getElementById('marioWarp').play();
+			}
+			function SendMario() {
+				var m = document.createElement("div");
+				m.id = "mario-" + mcounter++;
+				m.className = "mario enter";
+				setTimeout(PlayWarp, 2000);
+				setTimeout(function() {
+					nsqdemo.SendServer({
+						id: m.id,
+						cmd: "mario send",
+					});
+				}, 3000);
+				document.getElementById('marioFall').play();
+				document.getElementById("marioBG").appendChild(m);
+				return m.id
+			}
+			function ReceiveMario(dta) {
+				var obj = JSON.parse(dta);
+				var m = document.getElementById(obj.id);
+				m.className = "mario exit";
+				setTimeout(function() {
+					document.getElementById('marioDie').play();
+				}, 2000);
+				PlayWarp();
+			}
+			// NSQ Demo
+			var nsqdemo = new NSQDemo(ReceiveMario.bind(this));
+
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				slideNumber: true,
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+			
+			// Slide events for demo runs
+			Reveal.addEventListener( 'slidechanged', function( event ) {
+				// event.previousSlide, event.currentSlide, event.indexh, event.indexv
+				var music = document.getElementById('marioMusic');
+				var yeah = document.getElementById('marioYeah');
+				if (event.indexh === 6 && event.indexv === 2) {
+					music.volume = 0.5;
+					music.play();
+				} else {
+					music.pause();
+					music.currentTime = 0;
+				}
+				if (event.indexh === 6 && event.indexv === 1) {
+					yeah.play();
+				}
+			} );
+		</script>
+	</body>
+</html>
