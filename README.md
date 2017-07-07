@@ -2,6 +2,8 @@
 
 Prezentacija opisuje kako radi i kako se koristi [NSQ](http://nsq.io/), te kako ga koristimo u [Minus5](http://www.minus5.hr/).
 
+Prezentaciju bez integriranog demoa možete pogledati na [https://minus5.github.io/nsq-prezentacija/](https://minus5.github.io/nsq-prezentacija/)
+
 ## Pokretanje prezentacije
 
 Prije pokretanja, potrebno je imati instaliran [Consul](https://www.consul.io/) i [NSQ](http://nsq.io/)
