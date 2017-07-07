@@ -9,79 +9,6 @@
 		<link rel="stylesheet" href="css/theme/league.css" id="theme">
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
-		<style>
-			#marioBG{
-				width: 767px;
-				height: 519px;
-				background-image: url('img/MarioDemoScr.png');
-				background-repeat: no-repeat no-repeat;
-				overflow: hidden;
-				position: relative;
-			}
-			.mario{
-				width: 42px;
-				height: 71px;
-				background-image: url('img/SuperMario3_2.png');
-				background-repeat: no-repeat no-repeat;
-				background-position: bottom left;
-			}
-			@keyframes marioWalk {
-				from {
-					background-position-x: 0px;
-				}
-				to{
-					background-position-x: -225px;
-				}
-			}
-			@keyframes enterMario {
-				0%{
-					top: -71px;
-					left: 400px;
-					width: 42px;
-				}
-				25%{
-					top: 125px;
-					left: 400px;
-					width: 42px;
-				}
-				75%{
-					left: 490px;
-					width: 42px;
-				}
-				100%{
-					left: 526px;
-					width: 0px;
-				}
-			}
-			.enter {
-				position: absolute;
-				left:490px;
-				top:125px;
-				animation: enterMario 3s forwards 1, marioWalk 0.8s steps(5) infinite;
-			}
-			@keyframes marioExit {
-				0% {
-					height: 0px;
-					top: 407px
-				}
-				25% {
-					height: 71px;
-					top: 407px
-				}
-				100% {
-					top: 519px;
-				}
-			}
-			.exit {
-				position: absolute;
-				left:605px;
-				top:407px;
-				animation-name: marioExit;
-				animation-duration: 3s;
-				animation-iteration-count: 1;
-				animation-fill-mode: forwards;
-			}
-		</style>
 		<!-- Printing and PDF exports -->
 		<script>
 			var link = document.createElement( 'link' );
@@ -242,23 +169,6 @@
 							<source src="snd/mario_something.wav">
 						</audio>
 					</section>
-					<section data-transition="convex">
-						<h3>Pošalji Maria kroz NSQ</h3>
-						<div id="marioBG" onclick="SendMario()" style="margin:0 auto;"></div>
-						<audio id="marioWarp" preload="auto">
-							<source src="snd/nsmbwiiWarpPipe.wav">
-						</audio>
-						<audio id="marioFall" preload="auto">
-							<source src="snd/nsmb_flagpole.wav">
-						</audio>
-						<audio id="marioDie" preload="auto">
-							<source src="snd/nsmbwiiDeath.wav">
-						</audio>
-						<audio id="marioMusic" preload="auto">
-							<source src="snd/02-title-screen-nsmbwii-.mp3">
-						</audio>
-						<small>Hint: klikni na level!</small>
-					</section>
 					<section data-background-image="img/gopher_doc.png" data-background-position="left 0 bottom 0" data-background-size="auto auto" data-transition="convex">
 						<h3>Kako poslati poruku?</h3>
 						<pre class="fragment"><code class="go">
@@ -380,40 +290,7 @@ func onNSQMsg(msg *nsq.Message) error {
 
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
-		<script src="js/nsqdemo.js"></script>
 		<script>
-			// Mario stuff
-			var mcounter = 0;
-			function PlayWarp() {
-				document.getElementById('marioWarp').play();
-			}
-			function SendMario() {
-				var m = document.createElement("div");
-				m.id = "mario-" + mcounter++;
-				m.className = "mario enter";
-				setTimeout(PlayWarp, 2000);
-				setTimeout(function() {
-					nsqdemo.SendServer({
-						id: m.id,
-						cmd: "mario send",
-					});
-				}, 3000);
-				document.getElementById('marioFall').play();
-				document.getElementById("marioBG").appendChild(m);
-				return m.id
-			}
-			function ReceiveMario(dta) {
-				var obj = JSON.parse(dta);
-				var m = document.getElementById(obj.id);
-				m.className = "mario exit";
-				setTimeout(function() {
-					document.getElementById('marioDie').play();
-				}, 2000);
-				PlayWarp();
-			}
-			// NSQ Demo
-			var nsqdemo = new NSQDemo(ReceiveMario.bind(this));
-
 			// More info about config & dependencies:
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
@@ -430,15 +307,7 @@ func onNSQMsg(msg *nsq.Message) error {
 			// Slide events for demo runs
 			Reveal.addEventListener( 'slidechanged', function( event ) {
 				// event.previousSlide, event.currentSlide, event.indexh, event.indexv
-				var music = document.getElementById('marioMusic');
 				var yeah = document.getElementById('marioYeah');
-				if (event.indexh === 6 && event.indexv === 2) {
-					music.volume = 0.5;
-					music.play();
-				} else {
-					music.pause();
-					music.currentTime = 0;
-				}
 				if (event.indexh === 6 && event.indexv === 1) {
 					yeah.play();
 				}
